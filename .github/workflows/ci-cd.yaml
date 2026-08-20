@@ -105,10 +105,10 @@ jobs:
 
       # --- Update Kubernetes Cluster ---
       - name: Set up Kubernetes Cluster Context
-        uses: azure/k8s-set-context@v4
-        with:
-          method: kubeconfig
-          content: ${{ secrets.KUBE_CONFIG_DATA }}
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
 
       - name: Apply Kubernetes Manifests
         run: |
