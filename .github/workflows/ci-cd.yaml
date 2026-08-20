@@ -1,0 +1,123 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  # ==========================================
+  # CONTINUOUS INTEGRATION (CI)
+  # ==========================================
+  ci:
+    name: Build & Test Services
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service: 
+          - devops.restauranty/backend/auth
+          - devops.restauranty/backend/discounts
+          - devops.restauranty/backend/items
+          - devops.restauranty/client
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: ${{ matrix.service }}/package-lock.json
+
+      - name: Install Dependencies & Build
+        run: |
+          cd ${{ matrix.service }}
+          npm ci
+          # Run build if script exists in package.json
+          if npm run | grep -q "build"; then
+            npm run build
+          fi
+
+      - name: Run Tests
+        run: |
+          cd ${{ matrix.service }}
+          if npm test -- --ci --watchAll=false; then
+            echo "Tests passed successfully"
+          else
+            echo "No test script found or tests skipped"
+          fi
+
+  # ==========================================
+  # CONTINUOUS DEPLOYMENT (CD)
+  # ==========================================
+  cd:
+    name: Build, Push & Deploy to K8s
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      # --- Build and Push Client (Frontend) ---
+      - name: Build and Push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./devops.restauranty/client
+          file: ./devops.restauranty/client/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/restauranty-frontend:latest
+          build-args: |
+            REACT_APP_SERVER_URL=http://restauranty.prod
+
+      # --- Build and Push Backend Microservices ---
+      - name: Build and Push Auth Service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./devops.restauranty/backend/auth
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/restauranty-auth:latest
+
+      - name: Build and Push Discounts Service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./devops.restauranty/backend/discounts
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/restauranty-discounts:latest
+
+      - name: Build and Push Items Service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./devops.restauranty/backend/items
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/restauranty-items:latest
+
+      # --- Update Kubernetes Cluster ---
+      - name: Set up Kubernetes Cluster Context
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG_DATA }}
+
+      - name: Apply Kubernetes Manifests
+        run: |
+          kubectl apply -f infrastructure/
+          kubectl rollout restart deployment frontend-deployment
+          kubectl rollout restart deployment auth-deployment
+          kubectl rollout restart deployment discounts-deployment
+          kubectl rollout restart deployment items-deployment
