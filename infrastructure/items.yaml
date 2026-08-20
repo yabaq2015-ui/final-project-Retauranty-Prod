@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: items-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: items
+  template:
+    metadata:
+      labels:
+        app: items
+    spec:
+      containers:
+      - name: items
+        image: husseinyabaq/restauranty-items:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3003
+        envFrom:
+        - configMapRef:
+            name: items-config
+        - secretRef:
+            name: items-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: items-service
+spec:
+  selector:
+    app: items
+  ports:
+    - protocol: TCP
+      port: 3003
+      targetPort: 3003
+  type: ClusterIP
