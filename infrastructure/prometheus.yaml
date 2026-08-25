@@ -1,0 +1,58 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'restauranty-items'
+    kubernetes_sd_configs:
+      - role: service
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_label_app]
+        regex: items
+        action: keep
+      - source_labels: [__meta_kubernetes_service_port_number]
+        regex: '3003'
+        action: keep
+
+  - job_name: 'restauranty-auth'
+    kubernetes_sd_configs:
+      - role: service
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_label_app]
+        regex: auth
+        action: keep
+      - source_labels: [__meta_kubernetes_service_port_number]
+        regex: '3001'
+        action: keep
+
+  - job_name: 'restauranty-discounts'
+    kubernetes_sd_configs:
+      - role: service
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_label_app]
+        regex: discounts
+        action: keep
+      - source_labels: [__meta_kubernetes_service_port_number]
+        regex: '3002'
+        action: keep
+
+  - job_name: 'restauranty-frontend'
+    kubernetes_sd_configs:
+      - role: service
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_label_app]
+        regex: frontend
+        action: keep
+      - source_labels: [__meta_kubernetes_service_port_number]
+        regex: '80'
+        action: keep
+
+  - job_name: 'restauranty-mongodb'
+    kubernetes_sd_configs:
+      - role: service
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_label_app]
+        regex: mongodb
+        action: keep
+      - source_labels: [__meta_kubernetes_service_port_number]
+        regex: '27017'
+        action: keep
