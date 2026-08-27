@@ -110,9 +110,14 @@ jobs:
           echo "${{ secrets.KUBE_CONFIG_DATA }}" > ~/.kube/config
           chmod 600 ~/.kube/config
 
-      - name: Apply Kubernetes Manifests
+      
+        - name: Apply Kubernetes Manifests
         run: |
-          kubectl apply -f infrastructure/
+          kubectl apply -f infrastructure/auth.yaml || true
+          kubectl apply -f infrastructure/discounts.yaml || true
+          kubectl apply -f infrastructure/items.yaml || true
+          kubectl apply -f infrastructure/frontend.yaml || true
+          kubectl apply -f infrastructure/ingress.yaml || true
           kubectl rollout restart deployment frontend-deployment
           kubectl rollout restart deployment auth-deployment
           kubectl rollout restart deployment discounts-deployment
