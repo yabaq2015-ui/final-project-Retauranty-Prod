@@ -4,8 +4,13 @@ metadata:
   name: restauranty-ingress
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
+  tls:
+  - hosts:
+    - restauranty.prod
+    secretName: restauranty-tls-secret
   rules:
   - host: restauranty.prod
     http:
