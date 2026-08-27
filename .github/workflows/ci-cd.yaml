@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        service: 
+        service:
           - devops.restauranty/backend/auth
           - devops.restauranty/backend/discounts
           - devops.restauranty/backend/items
@@ -79,7 +79,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/restauranty-frontend:latest
           build-args: |
-            REACT_APP_SERVER_URL=http://restauranty.prod
+            REACT_APP_SERVER_URL=https://restauranty.prod
 
       # --- Build and Push Backend Microservices ---
       - name: Build and Push Auth Service
