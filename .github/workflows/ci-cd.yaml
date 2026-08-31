@@ -79,7 +79,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/restauranty-frontend:latest
           build-args: |
-            REACT_APP_SERVER_URL=https://restauranty.prod
+            REACT_APP_SERVER_URL="https://restauranty.az.ironlabs.online"
 
       # --- Build and Push Backend Microservices ---
       - name: Build and Push Auth Service
