@@ -4,6 +4,8 @@ metadata:
   name: mongodb-deployment
 spec:
   replicas: 1
+  strategy:
+    type: Recreate  # Terminates the old pod completely before creating the new one
   selector:
     matchLabels:
       app: mongodb
@@ -25,24 +27,4 @@ spec:
         persistentVolumeClaim:
           claimName: mongodb-pvc
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mongodb-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: mongodb-service
-spec:
-  selector:
-    app: mongodb
-  ports:
-  - port: 27017
-    targetPort: 27017
+# (Keep your PVC and Service definitions below as they are)

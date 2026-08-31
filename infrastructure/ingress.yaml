@@ -9,10 +9,13 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - restauranty.prod
+    - restauranty.az.ironlabs.online
     secretName: restauranty-tls-secret
+  - hosts:
+    - grafana.az.ironlabs.online
+    secretName: grafana-tls-secret
   rules:
-  - host: restauranty.prod
+  - host: restauranty.az.ironlabs.online
     http:
       paths:
       - path: /api/auth(/|$)(.*)
@@ -41,5 +44,15 @@ spec:
         backend:
           service:
             name: frontend-service
+            port:
+              number: 80
+  - host: grafana.az.ironlabs.online
+    http:
+      paths:
+      - path: /(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: monitoring-grafana
             port:
               number: 80

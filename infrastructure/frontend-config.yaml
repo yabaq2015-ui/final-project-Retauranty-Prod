@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: frontend-config
 data:
-  REACT_APP_SERVER_URL: "http://restauranty.prod"
+  REACT_APP_SERVER_URL: "https://restauranty.az.ironlabs.online"

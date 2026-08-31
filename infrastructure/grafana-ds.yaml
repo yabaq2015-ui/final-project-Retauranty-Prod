@@ -1,0 +1,42 @@
+apiVersion: v1
+data:
+  datasource.yaml: |-
+    apiVersion: 1
+    datasources:
+    - name: "Prometheus"
+      type: prometheus
+      uid: prometheus
+      url: http://monitoring-kube-prometheus-prometheus.default:9090/
+      access: proxy
+      isDefault: true
+      jsonData:
+        httpMethod: POST
+        timeInterval: 30s
+    - name: "Alertmanager"
+      type: alertmanager
+      uid: alertmanager
+      url: http://monitoring-kube-prometheus-alertmanager.default:9093/
+      access: proxy
+      jsonData:
+        handleGrafanaManagedAlerts: false
+        implementation: prometheus
+kind: ConfigMap
+metadata:
+  annotations:
+    meta.helm.sh/release-name: monitoring
+    meta.helm.sh/release-namespace: default
+  creationTimestamp: "2026-08-27T17:05:13Z"
+  labels:
+    app: kube-prometheus-stack-grafana
+    app.kubernetes.io/instance: monitoring
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: kube-prometheus-stack
+    app.kubernetes.io/version: 88.5.4
+    chart: kube-prometheus-stack-88.5.4
+    grafana_datasource: "1"
+    heritage: Helm
+    release: monitoring
+  name: monitoring-kube-prometheus-grafana-datasource
+  namespace: default
+  resourceVersion: "618489"
+  uid: 333ac7c9-6eaf-4594-add3-921dcab281a7
